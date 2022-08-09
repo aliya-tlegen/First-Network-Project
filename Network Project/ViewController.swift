@@ -10,7 +10,12 @@ import SnapKit
 
 class ViewController: UIViewController {
     
+    // MARK: - Public Variables -
+    
     var items = [Post]()
+    let networkManager = NetworkManager()
+    
+    // MARK: - Private Variables -
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -23,18 +28,29 @@ class ViewController: UIViewController {
         tableView.register(PostTableViewCell.self, forCellReuseIdentifier: "PostTableViewCell")
         return tableView
     }()
-    
-    let sessionConfiguration = URLSessionConfiguration.default
-    let session = URLSession.shared
-    let decoder = JSONDecoder()
 
+    // MARK: - LifeCycle -
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
         setupConstraints()
         setupNavigationItem()
-        obtainPosts()
+        networkManager.obtainPosts { [weak self] (result) in
+            switch result {
+            case .success(let posts):
+                self?.items = posts
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+            }
+            
+        }
     }
+    
+    // MARK: - Setup -
     
     func setupViews() {
         view.addSubview(tableView)
@@ -50,28 +66,9 @@ class ViewController: UIViewController {
         navigationItem.title = "Posts"
     }
     
-    func obtainPosts() {
-        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { return
-        }
-        session.dataTask(with: url) { [weak self](data, response, error)  in
-            guard let strongSelf = self else {return}
-            if error == nil, let parseData = data {
-                
-                guard let posts = try? strongSelf.decoder.decode([Post].self, from: parseData) else {
-                    return
-                }
-                strongSelf.items = posts
-                
-                DispatchQueue.main.async {
-                    strongSelf.tableView.reloadData()
-                }
-            } else {
-                print("Error: \(error?.localizedDescription)")
-            }
-            
-        }.resume()
-    }
 }
+
+// MARK: - Extensions -
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
     

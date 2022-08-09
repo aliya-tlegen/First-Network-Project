@@ -9,7 +9,7 @@ import UIKit
 
 class PostTableViewCell: UITableViewCell {
     
-//    let identifier = "PostTableViewCell"
+    // MARK: - Private Variables -
 
     private let title: UILabel = {
         let label = UILabel()
@@ -21,6 +21,8 @@ class PostTableViewCell: UITableViewCell {
         return label
     }()
     
+    // MARK: - Initialization -
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupViews()
@@ -31,10 +33,14 @@ class PostTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Configuration -
+    
     func configure(model: Post) {
         title.text = model.title
         body.text = model.body
     }
+    
+    // MARK: - Setup -
     
     func setupViews() {
         contentView.addSubview(title)
